@@ -1,0 +1,64 @@
+version: '3.8'
+
+networks:
+  sgu-net:
+    driver: bridge
+
+volumes:
+  sgu-volume:
+    driver: local
+
+services:
+  database:
+    image: mysql:8
+    container_name: sgu-database
+    networks:
+      - sgu-net
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sgu_db
+      MYSQL_USER: sgu_user
+      MYSQL_PASSWORD: sgu_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - sgu-volume:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: server:1.0-sgu
+    container_name: sgu-backend
+    networks:
+      - sgu-net
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/sgu_db
+      SPRING_DATASOURCE_USERNAME: sgu_user
+      SPRING_DATASOURCE_PASSWORD: sgu_pass
+    depends_on:
+      database:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        API_HOST: backend
+        API_PORT: 8081
+        API_BASE: adj-api
+    image: client:1.0-sgu
+    container_name: sgu-frontend
+    networks:
+      - sgu-net
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
