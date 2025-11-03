@@ -96,7 +96,7 @@ pipeline {
                         echo "Verificando Frontend..."
                         curl -f http://localhost:5173 || exit 1
                         
-                        echo "\\n✅ Todos los servicios están funcionando correctamente"
+                        echo "Todos los servicios funcionan correctamente"
                     '''
                 }
             }
@@ -105,16 +105,16 @@ pipeline {
     
     post {
         success {
-            echo '✅ ¡Pipeline ejecutado exitosamente!'
-            echo '📦 Servicios desplegados:'
-            echo '   🌐 Frontend: http://localhost:5173'
-            echo '   🔧 Backend API: http://localhost:8081/api/users'
-            echo '   💾 Base de datos MySQL: localhost:3307'
+            echo 'Pipeline ejecutado exitosamente'
+            echo 'Servicios desplegados:'
+            echo '  - Frontend: http://localhost:5173'
+            echo '  - Backend API: http://localhost:8081/api/users'
+            echo '  - Base de datos MySQL: localhost:3307'
             echo ''
             sh 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"'
         }
         failure {
-            echo '❌ El pipeline falló. Revisando logs...'
+            echo 'El pipeline fallo. Revisando logs...'
             sh '''
                 echo "=== LOGS COMPLETOS ==="
                 ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} logs
