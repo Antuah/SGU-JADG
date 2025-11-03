@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   sgu-net:
     driver: bridge
@@ -15,7 +13,7 @@ services:
     networks:
       - sgu-net
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root_pass
       MYSQL_DATABASE: sgu_db
       MYSQL_USER: sgu_user
       MYSQL_PASSWORD: sgu_pass
@@ -24,7 +22,7 @@ services:
     volumes:
       - sgu-volume:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_pass"]
       timeout: 20s
       retries: 10
 

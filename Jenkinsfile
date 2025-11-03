@@ -73,23 +73,49 @@ pipeline {
                 }
             }
         }
+        
+        stage('Health Check') {
+            steps {
+                script {
+                    echo 'Verificando health de los servicios...'
+                    sh '''
+                        echo "Verificando Base de Datos..."
+                        docker exec sgu-database mysqladmin ping -h localhost -u root -proot_pass || exit 1
+                        
+                        echo "Verificando Backend API..."
+                        curl -f http://localhost:8081/api/users || exit 1
+                        
+                        echo "Verificando Frontend..."
+                        curl -f http://localhost:5173 || exit 1
+                        
+                        echo "\\n✅ Todos los servicios están funcionando correctamente"
+                    '''
+                }
+            }
+        }
     }
     
     post {
         success {
-            echo '¡Pipeline ejecutado exitosamente!'
-            echo 'Frontend disponible en: http://localhost:5173'
-            echo 'Backend disponible en: http://localhost:8081'
-            echo 'Base de datos disponible en: localhost:3306'
+            echo '✅ ¡Pipeline ejecutado exitosamente!'
+            echo '📦 Servicios desplegados:'
+            echo '   🌐 Frontend: http://localhost:5173'
+            echo '   🔧 Backend API: http://localhost:8081/api/users'
+            echo '   💾 Base de datos MySQL: localhost:3307'
+            echo ''
+            sh 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"'
         }
         failure {
-            echo 'El pipeline falló. Revisando logs...'
+            echo '❌ El pipeline falló. Revisando logs...'
             sh '''
+                echo "=== LOGS COMPLETOS ==="
                 docker-compose -f ${DOCKER_COMPOSE_FILE} logs
+                echo "\\n=== Limpiando recursos ==="
+                docker-compose -f ${DOCKER_COMPOSE_FILE} down -v || true
             '''
         }
         always {
-            echo 'Limpieza finalizada'
+            echo 'Pipeline finalizado'
         }
     }
 }
