@@ -15,7 +15,10 @@ pipeline {
                 script {
                     echo 'Limpiando contenedores y recursos previos...'
                     sh '''
-                        ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} down -v || true
+                        # intentar bajar servicios y eliminar contenedores huérfanos
+                        ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} down -v --remove-orphans || true
+                        # forzar eliminación de contenedores con nombres conocidos (en caso de conflicto)
+                        docker rm -f sgu-database sgu-backend sgu-frontend || true
                         docker system prune -f || true
                     '''
                 }
@@ -38,6 +41,8 @@ pipeline {
                 script {
                     echo 'Iniciando servicios con Docker Compose...'
                     sh '''
+                        # asegurar que no haya contenedores conflictivos
+                        docker rm -f sgu-database sgu-backend sgu-frontend || true
                         ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} up -d
                     '''
                 }
