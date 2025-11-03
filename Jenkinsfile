@@ -5,6 +5,8 @@ pipeline {
         DOCKER_COMPOSE_FILE = 'docker-compose.yml'
         PROJECT_NAME = 'sgu-jadg-10a'
         DOCKER_COMPOSE = '/usr/local/bin/docker-compose'
+        DOCKER_CONFIG = "${env.HOME}/.jenkins/.docker"
+        PATH = "/usr/local/bin:${env.PATH}"
     }
     
     stages {
