@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_COMPOSE_FILE = 'docker-compose.yml'
         PROJECT_NAME = 'sgu-jadg-10a'
+        DOCKER_COMPOSE = '/usr/local/bin/docker-compose'
     }
     
     stages {
@@ -12,7 +13,7 @@ pipeline {
                 script {
                     echo 'Limpiando contenedores y recursos previos...'
                     sh '''
-                        docker-compose -f ${DOCKER_COMPOSE_FILE} down -v || true
+                        ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} down -v || true
                         docker system prune -f || true
                     '''
                 }
@@ -24,7 +25,7 @@ pipeline {
                 script {
                     echo 'Construyendo imágenes Docker...'
                     sh '''
-                        docker-compose -f ${DOCKER_COMPOSE_FILE} build --no-cache
+                        ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} build --no-cache
                     '''
                 }
             }
@@ -35,7 +36,7 @@ pipeline {
                 script {
                     echo 'Iniciando servicios con Docker Compose...'
                     sh '''
-                        docker-compose -f ${DOCKER_COMPOSE_FILE} up -d
+                        ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} up -d
                     '''
                 }
             }
@@ -109,9 +110,9 @@ pipeline {
             echo '❌ El pipeline falló. Revisando logs...'
             sh '''
                 echo "=== LOGS COMPLETOS ==="
-                docker-compose -f ${DOCKER_COMPOSE_FILE} logs
+                ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} logs
                 echo "\\n=== Limpiando recursos ==="
-                docker-compose -f ${DOCKER_COMPOSE_FILE} down -v || true
+                ${DOCKER_COMPOSE} -f ${DOCKER_COMPOSE_FILE} down -v || true
             '''
         }
         always {
