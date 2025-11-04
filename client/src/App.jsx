@@ -1,4 +1,3 @@
-import TestController from "./modules/test/test.controller";
 import UserList from "./modules/user/UserList";
 
 function App() {
@@ -12,9 +11,6 @@ function App() {
           <div className="collapse navbar-collapse">
             <ul className="navbar-nav ms-auto">
               <li className="navbar-item">
-                <button onClick={() => TestController.callToAPI()} className="btn btn-outline-light btn-sm">
-                  Test API
-                </button>
               </li>
             </ul>
           </div>
